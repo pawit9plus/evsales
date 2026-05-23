@@ -117,6 +117,27 @@
     width: 100%; max-width: 220px; aspect-ratio: 16/10; object-fit: cover;
     border-radius: 8px; background: var(--bg-2); margin: 6px 0 8px;
   }
+
+  /* Pagination */
+  .pagination {
+    display: flex; justify-content: center; align-items: center; gap: 6px;
+    margin-top: 32px; flex-wrap: wrap;
+  }
+  .page-btn {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 14px;
+    font-weight: 600; min-width: 40px; font-family: inherit; transition: all 0.15s;
+  }
+  .page-btn:hover:not(:disabled) { background: var(--card-2); border-color: var(--accent-2); }
+  .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .page-btn.active {
+    background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white;
+  }
+  .page-ellipsis { padding: 0 6px; color: var(--muted); }
+  .page-info {
+    width: 100%; text-align: center; color: var(--muted); font-size: 13px;
+    margin-top: 4px;
+  }
   .card:hover { transform: translateY(-2px); border-color: var(--accent-2); }
   .card.has-promo { border-color: rgba(251,191,36,0.4); }
   .card.has-promo::before {
@@ -360,6 +381,7 @@
     </div>
 
     <div class="grid" id="grid"></div>
+    <div class="pagination" id="pagination"></div>
   </section>
 
   <!-- COMPARE VIEW -->
@@ -488,6 +510,9 @@ const EVS = [
   { brand: "BYD", model: "M6 7-Seater", price: 879900, battery: 71.8, range: 530, motor: 150, ac: 7, dc: 115, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "MPV" },
   { brand: "BYD", model: "Sealion 6 DM-i (PHEV)", price: 859900, oldPrice: 1099900, battery: 18.3, range: 1100, motor: 160, ac: 6.6, dc: 18, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV (PHEV)" },
   { brand: "BYD", model: "Sealion 7 Premium", price: 1199900, oldPrice: 1249900, battery: 82.56, range: 567, motor: 230, ac: 11, dc: 150, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "BYD", model: "Atto 2", price: 699900, battery: 45.12, range: 380, motor: 130, ac: 7, dc: 65, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "BYD", model: "Han EV Premium", price: 1799000, battery: 85.4, range: 605, motor: 220, ac: 11, dc: 120, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "BYD", model: "Tang EV", price: 1999000, battery: 108.8, range: 530, motor: 380, ac: 11, dc: 110, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV 7 seat" },
 
   // MG
   { brand: "MG", model: "MG4 X Electric (MY2026)", price: 599900, oldPrice: 869000, battery: 51, range: 425, motor: 125, ac: 6.6, dc: 117, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Hatchback" },
@@ -522,6 +547,7 @@ const EVS = [
   { brand: "GAC Aion", model: "Y Plus Premium", price: 769900, oldPrice: 899900, battery: 50.6, range: 410, motor: 150, ac: 6.6, dc: 70, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
   { brand: "GAC Aion", model: "Y Plus 490", price: 999900, battery: 63.4, range: 490, motor: 150, ac: 6.6, dc: 70, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
   { brand: "GAC Aion", model: "ES", price: 850000, battery: 60, range: 442, motor: 100, ac: 6.6, dc: 70, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "GAC Aion", model: "V Plus", price: 1099000, battery: 70, range: 520, motor: 165, ac: 6.6, dc: 90, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
   { brand: "GAC Aion", model: "Hyper HT (Motor Show Promo)", price: 1199000, oldPrice: 1899000, battery: 83, range: 670, motor: 250, ac: 11, dc: 180, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
 
   // Volvo
@@ -537,12 +563,14 @@ const EVS = [
   { brand: "BMW", model: "i4 eDrive40 M Sport", price: 3789000, oldPrice: 3899000, battery: 83.9, range: 590, motor: 250, ac: 11, dc: 205, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
   { brand: "BMW", model: "i5 eDrive40 M Sport (CKD)", price: 3499000, oldPrice: 4999000, battery: 84, range: 580, motor: 250, ac: 11, dc: 205, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
   { brand: "BMW", model: "iX xDrive40", price: 4999000, battery: 76.6, range: 425, motor: 240, ac: 11, dc: 150, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "BMW", model: "i7 xDrive60", price: 6999000, battery: 101.7, range: 625, motor: 400, ac: 11, dc: 195, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
 
   // Mercedes-Benz — Major cuts on EQE/EQS
   { brand: "Mercedes-Benz", model: "EQA 250", price: 2790000, battery: 70.5, range: 426, motor: 140, ac: 11, dc: 100, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
   { brand: "Mercedes-Benz", model: "EQB 250+ AMG Line", price: 2990000, battery: 70.5, range: 430, motor: 140, ac: 11, dc: 100, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV (7 seat)" },
   { brand: "Mercedes-Benz", model: "EQE 300 Sedan", price: 2890000, oldPrice: 4290000, battery: 90.6, range: 654, motor: 215, ac: 11, dc: 170, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
   { brand: "Mercedes-Benz", model: "EQS 450+ AMG Dynamic", price: 4590000, oldPrice: 6990000, battery: 107.8, range: 716, motor: 245, ac: 22, dc: 200, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "10 ปี / 250,000 km", type: "Sedan" },
+  { brand: "Mercedes-Benz", model: "EQS 450 4MATIC SUV", price: 8990000, battery: 107.8, range: 660, motor: 265, ac: 22, dc: 200, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "10 ปี / 250,000 km", type: "SUV" },
 
   // Hyundai — Aggressive discounts
   { brand: "Hyundai", model: "Ioniq 5 SE", price: 1299000, oldPrice: 1849000, battery: 58, range: 384, motor: 125, ac: 11, dc: 220, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
@@ -589,6 +617,23 @@ const EVS = [
   { brand: "Porsche", model: "Taycan 4S", price: 7900000, battery: 105, range: 642, motor: 320, ac: 11, dc: 320, warrantyCar: "2 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
   { brand: "Audi", model: "Q4 e-tron 45", price: 3599000, battery: 82, range: 521, motor: 210, ac: 11, dc: 175, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
   { brand: "Audi", model: "e-tron GT quattro", price: 6390000, oldPrice: 6990000, battery: 93.4, range: 488, motor: 350, ac: 11, dc: 270, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+
+  // Lexus
+  { brand: "Lexus", model: "RZ 450e", price: 3990000, battery: 71.4, range: 440, motor: 230, ac: 7, dc: 150, warrantyCar: "3 ปี / 100,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Lexus", model: "UX 300e", price: 2790000, battery: 72.8, range: 450, motor: 150, ac: 6.6, dc: 50, warrantyCar: "3 ปี / 100,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+
+  // Subaru / Mazda
+  { brand: "Subaru", model: "Solterra", price: 1999000, battery: 71.4, range: 414, motor: 160, ac: 6.6, dc: 150, warrantyCar: "3 ปี / 100,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Mazda", model: "MX-30 EV", price: 1599000, battery: 35.5, range: 200, motor: 107, ac: 6.6, dc: 50, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV Coupe" },
+
+  // Smart (Geely-Mercedes JV)
+  { brand: "Smart", model: "#1 Pro+", price: 1599000, battery: 66, range: 440, motor: 200, ac: 22, dc: 150, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Smart", model: "#3 Premium", price: 1799000, battery: 66, range: 455, motor: 200, ac: 22, dc: 150, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV Coupe" },
+
+  // Voyah / Avatr (Premium Chinese)
+  { brand: "Voyah", model: "Free", price: 1999000, battery: 80, range: 500, motor: 360, ac: 11, dc: 100, warrantyCar: "5 ปี / 100,000 km", warrantyBattery: "8 ปี / 150,000 km", type: "SUV" },
+  { brand: "Voyah", model: "Dreamer", price: 2499000, battery: 82, range: 500, motor: 320, ac: 11, dc: 100, warrantyCar: "5 ปี / 100,000 km", warrantyBattery: "8 ปี / 150,000 km", type: "MPV" },
+  { brand: "Avatr", model: "11 Long Range", price: 3499000, battery: 90.4, range: 555, motor: 425, ac: 11, dc: 240, warrantyCar: "8 ปี / 160,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
 ];
 
 // ============================================================================
@@ -680,6 +725,8 @@ function setupImageLazyLoad() {
 // ============================================================================
 // STATE & RENDERING
 // ============================================================================
+const PAGE_SIZE = 10;
+let currentPage = 1;
 let selected = new Set();
 const grid = document.getElementById("grid");
 const search = document.getElementById("search");
@@ -739,11 +786,17 @@ function carId(c) { return c.brand + "::" + c.model; }
 function renderGrid() {
   const list = filterAndSort();
   grid.innerHTML = "";
+  document.getElementById("pagination").innerHTML = "";
   if (list.length === 0) {
     grid.innerHTML = '<div class="empty"><h3>ไม่พบรถที่ค้นหา</h3><p>ลองเปลี่ยนคำค้นหรือเลือกแบรนด์อื่น</p></div>';
     return;
   }
-  list.forEach(c => {
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageList = list.slice(start, start + PAGE_SIZE);
+  pageList.forEach(c => {
     const isSel = selected.has(carId(c));
     const save = savings(c);
     const hasPromo = save > 0;
@@ -787,7 +840,46 @@ function renderGrid() {
     `;
     grid.appendChild(div);
   });
+  renderPagination(list.length, totalPages);
   setupImageLazyLoad();
+}
+
+function getPageNumbers(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = [1];
+  if (current > 3) pages.push("...");
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+  if (current < total - 2) pages.push("...");
+  pages.push(total);
+  return pages;
+}
+
+function renderPagination(total, totalPages) {
+  const wrap = document.getElementById("pagination");
+  if (totalPages <= 1) {
+    wrap.innerHTML = `<div class="page-info">แสดงทั้งหมด ${total} รุ่น</div>`;
+    return;
+  }
+  let html = "";
+  html += `<button class="page-btn" ${currentPage === 1 ? "disabled" : ""} onclick="gotoPage(${currentPage - 1})">← ก่อนหน้า</button>`;
+  getPageNumbers(currentPage, totalPages).forEach(p => {
+    if (p === "...") {
+      html += `<span class="page-ellipsis">…</span>`;
+    } else {
+      html += `<button class="page-btn ${p === currentPage ? "active" : ""}" onclick="gotoPage(${p})">${p}</button>`;
+    }
+  });
+  html += `<button class="page-btn" ${currentPage === totalPages ? "disabled" : ""} onclick="gotoPage(${currentPage + 1})">ถัดไป →</button>`;
+  const from = (currentPage - 1) * PAGE_SIZE + 1;
+  const to = Math.min(currentPage * PAGE_SIZE, total);
+  html += `<div class="page-info">แสดง ${from}–${to} จากทั้งหมด ${total} รุ่น</div>`;
+  wrap.innerHTML = html;
+}
+
+function gotoPage(p) {
+  currentPage = p;
+  renderGrid();
+  document.getElementById("listSection").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function toggleSelect(id) {
@@ -1151,10 +1243,11 @@ document.addEventListener("keydown", (e) => {
 populateBrandFilter();
 renderGrid();
 updateLeadCount();
-search.addEventListener("input", renderGrid);
-brandFilter.addEventListener("change", renderGrid);
-sortBy.addEventListener("change", renderGrid);
-promoFilter.addEventListener("change", renderGrid);
+function resetAndRender() { currentPage = 1; renderGrid(); }
+search.addEventListener("input", resetAndRender);
+brandFilter.addEventListener("change", resetAndRender);
+sortBy.addEventListener("change", resetAndRender);
+promoFilter.addEventListener("change", resetAndRender);
 </script>
 
 </body>
