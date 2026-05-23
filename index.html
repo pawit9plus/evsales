@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EV Thailand — เปรียบเทียบรถยนต์ไฟฟ้าในไทย (พ.ค. 2026)</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg-2: #11172b;
+    --card: #161c33;
+    --card-2: #1c2340;
+    --text: #e7ecff;
+    --muted: #93a0c9;
+    --accent: #4ade80;
+    --accent-2: #38bdf8;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --border: #2a3358;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(180deg, #0a0f1f 0%, #0d1428 100%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Sukhumvit Set", "IBM Plex Sans Thai", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(11, 16, 32, 0.85);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    max-width: 1280px; margin: 0 auto; padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px;
+  }
+  .logo-badge {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #22c55e, #38bdf8);
+    display: grid; place-items: center; font-size: 20px;
+  }
+  .price-date {
+    font-size: 11px; color: var(--muted); font-weight: 500;
+    display: block; margin-top: 2px;
+  }
+  .tabs { display: flex; gap: 8px; }
+  .tab {
+    padding: 8px 16px; border-radius: 999px; cursor: pointer;
+    color: var(--muted); font-weight: 600; font-size: 14px;
+    border: 1px solid transparent; transition: all 0.2s;
+    background: transparent;
+  }
+  .tab:hover { color: var(--text); background: var(--card); }
+  .tab.active { color: var(--text); background: var(--card-2); border-color: var(--border); }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+  .hero {
+    text-align: center; padding: 40px 16px 24px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 4vw, 44px); margin: 0 0 12px;
+    background: linear-gradient(90deg, #4ade80, #38bdf8);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p { color: var(--muted); font-size: 16px; max-width: 720px; margin: 0 auto; }
+
+  .promo-banner {
+    background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(248,113,113,0.1));
+    border: 1px solid rgba(251,191,36,0.3); border-radius: 12px;
+    padding: 12px 18px; margin: 16px auto 24px; max-width: 720px;
+    font-size: 13px; color: var(--text); text-align: center;
+  }
+  .promo-banner strong { color: var(--warn); }
+
+  .controls {
+    display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 12px;
+    margin-bottom: 20px; padding: 16px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 16px;
+  }
+  .controls input, .controls select {
+    background: var(--bg-2); color: var(--text); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 10px; font-size: 14px; outline: none;
+    font-family: inherit;
+  }
+  .controls input:focus, .controls select:focus { border-color: var(--accent-2); }
+  @media (max-width: 720px) { .controls { grid-template-columns: 1fr 1fr; } }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px; transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent-2); }
+  .card.has-promo { border-color: rgba(251,191,36,0.4); }
+  .card.has-promo::before {
+    content: "🔥 PROMO"; position: absolute; top: 12px; right: -28px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444); color: white;
+    font-size: 10px; font-weight: 800; padding: 3px 32px; transform: rotate(35deg);
+    letter-spacing: 1px;
+  }
+  .card .brand {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--accent-2);
+  }
+  .card .model { font-size: 18px; font-weight: 700; margin: 4px 0 12px; }
+
+  .price-block { margin-bottom: 14px; }
+  .price-old {
+    text-decoration: line-through; color: var(--muted); font-size: 13px;
+    display: block; line-height: 1;
+  }
+  .price-current {
+    font-size: 22px; font-weight: 800; color: var(--accent);
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  }
+  .save-badge {
+    background: rgba(251,191,36,0.18); color: var(--warn);
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .card .specs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; font-size: 13px;
+    padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .spec-label { color: var(--muted); }
+  .spec-val { color: var(--text); font-weight: 600; text-align: right; }
+  .card .actions { margin-top: 14px; display: flex; gap: 8px; }
+  .btn {
+    flex: 1; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--bg-2); color: var(--text); cursor: pointer; font-size: 13px;
+    font-weight: 600; transition: all 0.15s; font-family: inherit;
+  }
+  .btn:hover { background: var(--card-2); }
+  .btn.primary { background: linear-gradient(135deg, #22c55e, #16a34a); border: none; }
+  .btn.primary:hover { filter: brightness(1.1); }
+  .btn.selected { background: linear-gradient(135deg, #38bdf8, #0284c7); border: none; }
+
+  .badge {
+    display: inline-block; padding: 3px 8px; border-radius: 6px;
+    background: rgba(74, 222, 128, 0.15); color: var(--accent);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    margin-left: 6px;
+  }
+
+  /* Compare panel */
+  .compare-bar {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--card-2); border: 1px solid var(--border); border-radius: 999px;
+    padding: 10px 16px; display: none; align-items: center; gap: 12px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.5); z-index: 40;
+  }
+  .compare-bar.show { display: flex; }
+  .compare-bar .count {
+    background: var(--accent-2); color: #0b1020; padding: 3px 10px;
+    border-radius: 999px; font-weight: 800; font-size: 13px;
+  }
+
+  .compare-section { display: none; }
+  .compare-section.active { display: block; }
+  .list-section.active { display: block; }
+  .list-section { display: none; }
+
+  .compare-table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid var(--border); }
+  table.compare {
+    width: 100%; border-collapse: collapse; background: var(--card);
+    min-width: 700px;
+  }
+  table.compare th, table.compare td {
+    padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  table.compare th {
+    background: var(--card-2); font-weight: 700; color: var(--muted);
+    position: sticky; top: 65px; z-index: 5;
+  }
+  table.compare td.label { color: var(--muted); font-weight: 600; width: 200px; }
+  table.compare .best { color: var(--accent); font-weight: 700; }
+  table.compare .car-name { font-size: 16px; font-weight: 800; }
+  table.compare .car-brand { font-size: 11px; color: var(--accent-2); letter-spacing: 1px; }
+  table.compare .car-price { color: var(--accent); font-weight: 800; font-size: 18px; }
+
+  .empty {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty h3 { color: var(--text); margin-bottom: 8px; }
+
+  .remove-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--danger);
+    padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;
+    margin-top: 8px;
+  }
+  .remove-btn:hover { background: rgba(248, 113, 113, 0.1); }
+
+  footer {
+    text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px;
+    border-top: 1px solid var(--border); margin-top: 40px;
+  }
+  .disclaimer { font-size: 11px; opacity: 0.7; margin-top: 6px; max-width: 720px; margin-left: auto; margin-right: auto; }
+
+  /* Interested button & Modal */
+  .btn-interest {
+    background: linear-gradient(135deg, #f59e0b, #ef4444); border: none; color: white;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px;
+    font-weight: 700; margin-top: 8px; width: 100%; font-family: inherit;
+    transition: filter 0.15s;
+  }
+  .btn-interest:hover { filter: brightness(1.1); }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(5, 8, 20, 0.75);
+    backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 20px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 28px; max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto;
+    animation: slideUp 0.25s ease-out;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal h2 { margin: 0 0 4px; font-size: 22px; }
+  .modal .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .modal .target {
+    background: var(--bg-2); padding: 10px 14px; border-radius: 10px;
+    margin-bottom: 18px; font-size: 14px;
+  }
+  .modal .target b { color: var(--accent-2); }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .field label .req { color: var(--danger); }
+  .field input, .field select {
+    width: 100%; background: var(--bg-2); color: var(--text); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 10px; font-size: 14px; outline: none;
+    font-family: inherit;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent-2); }
+  .field .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field .error {
+    color: var(--danger); font-size: 11px; margin-top: 4px; display: none;
+  }
+  .field.invalid input, .field.invalid select { border-color: var(--danger); }
+  .field.invalid .error { display: block; }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions .btn { flex: 1; padding: 12px; font-size: 14px; }
+  .btn-cancel { background: transparent; border: 1px solid var(--border); }
+  .btn-submit { background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; }
+
+  .success-msg {
+    text-align: center; padding: 30px 10px;
+  }
+  .success-msg .check {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a); margin: 0 auto 16px;
+    display: grid; place-items: center; font-size: 32px; color: white;
+  }
+
+  /* Leads admin */
+  .leads-link {
+    position: fixed; bottom: 20px; right: 20px; background: var(--card-2);
+    border: 1px solid var(--border); color: var(--text); padding: 10px 14px;
+    border-radius: 999px; cursor: pointer; font-size: 12px; font-weight: 600;
+    z-index: 30; box-shadow: 0 8px 24px rgba(0,0,0,0.3); font-family: inherit;
+  }
+  .leads-link:hover { background: var(--card); }
+  .leads-link .lead-count {
+    background: var(--accent); color: #0b1020; padding: 2px 8px;
+    border-radius: 999px; font-weight: 800; margin-left: 6px; font-size: 11px;
+  }
+
+  .leads-table {
+    width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px;
+  }
+  .leads-table th, .leads-table td {
+    padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left;
+  }
+  .leads-table th { color: var(--muted); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo">
+      <div class="logo-badge">⚡</div>
+      <div>EV Thailand
+        <span class="price-date">ราคา ณ พ.ค. 2026</span>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="list">รายการรถ</button>
+      <button class="tab" data-tab="compare">เปรียบเทียบ <span id="cmpCount" class="badge" style="display:none;">0</span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- LIST VIEW -->
+  <section class="list-section active" id="listSection">
+    <div class="hero">
+      <h1>เปรียบเทียบรถยนต์ไฟฟ้าในไทย</h1>
+      <p>รวมข้อมูลรถ EV ที่ขายในประเทศไทย พร้อมโปรโมชั่นล่าสุดเดือน พ.ค. 2026 — ราคา, แบตเตอรี่, ระยะทาง, ระบบชาร์จ, ประกัน. กดเลือกได้สูงสุด 4 คันเพื่อเปรียบเทียบ</p>
+    </div>
+
+    <div class="promo-banner">
+      🔥 <strong>สงครามราคา EV ปี 2026:</strong> BYD ลด ~25–30% ทั้งไลน์, Tesla Model 3 Standard เปิดที่ ฿1.149M, Mercedes EQE/EQS ลด 1.4–2.4M, BMW i5 ผลิตในไทยลด 1.5M, Hyundai Ioniq 5 ลดถึง 550k. กรองด้วย "เฉพาะมีโปร" เพื่อดูรุ่นที่ลดราคา
+    </div>
+
+    <div class="controls">
+      <input id="search" type="text" placeholder="ค้นหาแบรนด์หรือรุ่น เช่น BYD, Tesla, MG 4..." />
+      <select id="brandFilter">
+        <option value="">ทุกแบรนด์</option>
+      </select>
+      <select id="sortBy">
+        <option value="price-asc">ราคา ต่ำ → สูง</option>
+        <option value="price-desc">ราคา สูง → ต่ำ</option>
+        <option value="save-desc">ลดราคามากสุด</option>
+        <option value="range-desc">ระยะทาง มาก → น้อย</option>
+        <option value="battery-desc">แบตเตอรี่ มาก → น้อย</option>
+      </select>
+      <select id="promoFilter">
+        <option value="">ทุกรุ่น</option>
+        <option value="promo">เฉพาะมีโปร 🔥</option>
+      </select>
+      <button class="btn" onclick="clearSelection()">ล้างที่เลือก</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- COMPARE VIEW -->
+  <section class="compare-section" id="compareSection">
+    <div class="hero">
+      <h1>หน้าเปรียบเทียบสมรรถนะและราคา</h1>
+      <p id="compareDesc">เลือกรถจากหน้ารายการเพื่อนำมาเปรียบเทียบที่นี่</p>
+    </div>
+    <div id="compareContent"></div>
+  </section>
+</main>
+
+<div class="compare-bar" id="compareBar">
+  <span class="count" id="compareBarCount">0</span>
+  <span>คันถูกเลือก</span>
+  <button class="btn primary" onclick="goCompare()">ไปหน้าเปรียบเทียบ →</button>
+</div>
+
+<!-- INTEREST MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeModal()">
+  <div class="modal" id="modal">
+    <div id="modalForm">
+      <h2>📝 ลงทะเบียนความสนใจ</h2>
+      <div class="sub">กรอกข้อมูลเพื่อให้ทีมงานติดต่อกลับ — เฉพาะ <b>ชื่อ</b> เท่านั้นที่บังคับ ฟิลด์อื่นไม่บังคับ</div>
+      <div class="target" id="modalTarget"></div>
+
+      <div id="formError" style="display:none;background:rgba(248,113,113,0.15);border:1px solid var(--danger);color:var(--danger);padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:13px;font-weight:600;">
+        ⚠️ กรุณาตรวจสอบข้อมูลในช่องที่ขีดเส้นสีแดง
+      </div>
+
+      <div class="field" id="f-name">
+        <label>ชื่อ-นามสกุล <span class="req">*</span></label>
+        <input id="inp-name" type="text" placeholder="เช่น สมชาย ใจดี" />
+        <div class="error">กรุณากรอกชื่อ</div>
+      </div>
+
+      <div class="field" id="f-phone">
+        <label>เบอร์โทรศัพท์</label>
+        <input id="inp-phone" type="tel" placeholder="08X-XXX-XXXX" />
+        <div class="error">เบอร์โทรไม่ถูกต้อง</div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label>อีเมล</label>
+        <input id="inp-email" type="text" placeholder="you@example.com" />
+        <div class="error">รูปแบบอีเมลไม่ถูกต้อง</div>
+      </div>
+
+      <div class="field">
+        <div class="row">
+          <div class="field" id="f-gender" style="margin-bottom:0;">
+            <label>เพศ</label>
+            <select id="inp-gender">
+              <option value="">เลือก</option>
+              <option value="ชาย">ชาย</option>
+              <option value="หญิง">หญิง</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+            <div class="error">กรุณาเลือกเพศ</div>
+          </div>
+          <div class="field" id="f-age" style="margin-bottom:0;">
+            <label>อายุ</label>
+            <input id="inp-age" type="number" min="0" max="120" placeholder="เช่น 35" />
+            <div class="error">กรุณาตรวจสอบอายุ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn btn-submit" onclick="submitInterest()">ส่งข้อมูล</button>
+      </div>
+    </div>
+
+    <div id="modalSuccess" style="display:none;">
+      <div class="success-msg">
+        <div class="check">✓</div>
+        <h2>ขอบคุณค่ะ!</h2>
+        <div class="sub" style="margin-top:8px;">เราได้รับข้อมูลของคุณเรียบร้อย ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมง</div>
+        <button class="btn primary" style="margin-top:20px;max-width:200px;" onclick="closeModal()">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEADS ADMIN MODAL -->
+<div class="modal-backdrop" id="leadsBackdrop" onclick="if(event.target===this) closeLeads()">
+  <div class="modal" style="max-width:760px;">
+    <h2>📋 รายการ Leads ที่เก็บไว้</h2>
+    <div class="sub">ข้อมูลที่ลูกค้าลงทะเบียนความสนใจ — บันทึกใน browser localStorage</div>
+    <div id="leadsContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeLeads()">ปิด</button>
+      <button class="btn" onclick="exportLeadsCSV()" style="background:var(--accent-2);border:none;color:#0b1020;">⬇ Export CSV</button>
+      <button class="btn" onclick="clearLeads()" style="background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid var(--danger);">🗑 ล้างข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<button class="leads-link" onclick="openLeads()">
+  📋 Leads <span class="lead-count" id="leadCountBadge">0</span>
+</button>
+
+<footer>
+  <div>© 2026 EV Thailand Comparison — Updated พ.ค. 2026</div>
+  <div class="disclaimer">
+    ราคาอ้างอิงโปรโมชั่นปัจจุบันจากดีลเลอร์ทางการและสื่อรถยนต์ในไทย (autospinn, headlightmag, autolifethailand, checkraka, car250 ฯลฯ) — ราคาอาจเปลี่ยนแปลงตามแคมเปญในแต่ละช่วง โปรดยืนยันกับดีลเลอร์อีกครั้งก่อนตัดสินใจ. "ลด ฿X" แสดงส่วนต่างจากราคาเปิดตัว
+  </div>
+</footer>
+
+<script>
+// ============================================================================
+// DATA: EVs sold in Thailand — Updated May 2026
+// price = current promo price | oldPrice = launch price (if discounted)
+// ============================================================================
+const EVS = [
+  // BYD — Major price cuts 25-30%
+  { brand: "BYD", model: "Dolphin Standard Range", price: 509900, oldPrice: 699900, battery: 44.9, range: 340, motor: 70, ac: 7, dc: 65, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Hatchback" },
+  { brand: "BYD", model: "Dolphin Extended Range", price: 599900, oldPrice: 799900, battery: 60.48, range: 490, motor: 150, ac: 11, dc: 80, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Hatchback" },
+  { brand: "BYD", model: "Atto 3 Standard", price: 669900, oldPrice: 899900, battery: 49.92, range: 410, motor: 150, ac: 7, dc: 70, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "BYD", model: "Atto 3 Extended", price: 769900, oldPrice: 1099900, battery: 60.48, range: 480, motor: 150, ac: 7, dc: 88, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "BYD", model: "Seal Dynamic", price: 899900, oldPrice: 1199900, battery: 61.44, range: 510, motor: 150, ac: 7, dc: 110, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "BYD", model: "Seal Premium", price: 949900, oldPrice: 1325900, battery: 82.56, range: 650, motor: 230, ac: 11, dc: 150, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "BYD", model: "Seal Performance AWD", price: 1599900, battery: 82.56, range: 580, motor: 390, ac: 11, dc: 150, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "BYD", model: "Seal U DM-i (PHEV)", price: 999900, battery: 18.3, range: 1000, motor: 160, ac: 6.6, dc: 18, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV (PHEV)" },
+  { brand: "BYD", model: "M6 7-Seater", price: 879900, battery: 71.8, range: 530, motor: 150, ac: 7, dc: 115, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "MPV" },
+  { brand: "BYD", model: "Sealion 6 DM-i (PHEV)", price: 859900, oldPrice: 1099900, battery: 18.3, range: 1100, motor: 160, ac: 6.6, dc: 18, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV (PHEV)" },
+  { brand: "BYD", model: "Sealion 7 Premium", price: 1199900, oldPrice: 1249900, battery: 82.56, range: 567, motor: 230, ac: 11, dc: 150, warrantyCar: "6 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+
+  // MG
+  { brand: "MG", model: "MG4 X Electric (MY2026)", price: 599900, oldPrice: 869000, battery: 51, range: 425, motor: 125, ac: 6.6, dc: 117, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Hatchback" },
+  { brand: "MG", model: "MG4 Electric D", price: 969000, battery: 64, range: 530, motor: 150, ac: 6.6, dc: 117, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Hatchback" },
+  { brand: "MG", model: "MG ES", price: 989000, battery: 51, range: 380, motor: 130, ac: 6.6, dc: 76, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "SUV" },
+  { brand: "MG", model: "MG ZS EV", price: 599000, oldPrice: 999000, battery: 50.3, range: 320, motor: 130, ac: 6.6, dc: 76, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "SUV" },
+  { brand: "MG", model: "MG Cyberster", price: 2499000, oldPrice: 3399000, battery: 77, range: 503, motor: 400, ac: 7, dc: 144, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Roadster" },
+  { brand: "MG", model: "MG S5 EV", price: 879000, battery: 49, range: 340, motor: 125, ac: 7, dc: 80, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "SUV" },
+  { brand: "MG", model: "MG Maxus 9 V+ (MC 2026)", price: 1799900, oldPrice: 2199000, battery: 90, range: 540, motor: 180, ac: 11, dc: 100, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "MPV" },
+
+  // Tesla — Refreshed lineup with new Standard trim
+  { brand: "Tesla", model: "Model 3 Standard", price: 1149000, oldPrice: 1599000, battery: 60, range: 513, motor: 208, ac: 11, dc: 170, warrantyCar: "4 ปี / 80,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "Tesla", model: "Model 3 Long Range AWD", price: 1799000, oldPrice: 1899000, battery: 82, range: 629, motor: 366, ac: 11, dc: 250, warrantyCar: "4 ปี / 80,000 km", warrantyBattery: "8 ปี / 192,000 km", type: "Sedan" },
+  { brand: "Tesla", model: "Model 3 Performance", price: 2099000, oldPrice: 2199000, battery: 82, range: 528, motor: 460, ac: 11, dc: 250, warrantyCar: "4 ปี / 80,000 km", warrantyBattery: "8 ปี / 192,000 km", type: "Sedan" },
+  { brand: "Tesla", model: "Model Y RWD", price: 1719000, oldPrice: 1899000, battery: 60, range: 466, motor: 220, ac: 11, dc: 170, warrantyCar: "4 ปี / 80,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Tesla", model: "Model Y Long Range AWD", price: 2019000, oldPrice: 2199000, battery: 78, range: 600, motor: 378, ac: 11, dc: 250, warrantyCar: "4 ปี / 80,000 km", warrantyBattery: "8 ปี / 192,000 km", type: "SUV" },
+  { brand: "Tesla", model: "Model Y Performance", price: 2499000, battery: 82, range: 514, motor: 460, ac: 11, dc: 250, warrantyCar: "4 ปี / 80,000 km", warrantyBattery: "8 ปี / 192,000 km", type: "SUV" },
+
+  // ORA / GWM
+  { brand: "ORA", model: "Good Cat 400 Pro", price: 599000, oldPrice: 799000, battery: 47.8, range: 400, motor: 105, ac: 6.6, dc: 64, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Hatchback" },
+  { brand: "ORA", model: "Good Cat 500 Ultra", price: 899000, battery: 63.1, range: 500, motor: 105, ac: 11, dc: 80, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Hatchback" },
+  { brand: "ORA", model: "Good Cat GT", price: 1099000, battery: 63.1, range: 460, motor: 126, ac: 11, dc: 80, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Hatchback" },
+  { brand: "ORA", model: "07 Performance", price: 1219000, oldPrice: 1499000, battery: 83.5, range: 640, motor: 300, ac: 11, dc: 88, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Sedan" },
+
+  // NETA
+  { brand: "NETA", model: "NETA V", price: 409000, oldPrice: 549000, battery: 38.5, range: 384, motor: 70, ac: 6.6, dc: 40, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Hatchback" },
+  { brand: "NETA", model: "NETA V-II", price: 389000, oldPrice: 599000, battery: 40, range: 401, motor: 70, ac: 6.6, dc: 40, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Hatchback" },
+  { brand: "NETA", model: "NETA X 420 Smart", price: 739000, oldPrice: 759000, battery: 50, range: 420, motor: 120, ac: 6.6, dc: 60, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "NETA", model: "NETA X 500 Max", price: 799000, battery: 60, range: 500, motor: 120, ac: 6.6, dc: 80, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+
+  // GAC Aion / Hyptec
+  { brand: "GAC Aion", model: "Y Plus Premium", price: 769900, oldPrice: 899900, battery: 50.6, range: 410, motor: 150, ac: 6.6, dc: 70, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "GAC Aion", model: "Y Plus 490", price: 999900, battery: 63.4, range: 490, motor: 150, ac: 6.6, dc: 70, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "GAC Aion", model: "ES", price: 850000, battery: 60, range: 442, motor: 100, ac: 6.6, dc: 70, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "GAC Aion", model: "Hyper HT (Motor Show Promo)", price: 1199000, oldPrice: 1899000, battery: 83, range: 670, motor: 250, ac: 11, dc: 180, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+
+  // Volvo
+  { brand: "Volvo", model: "EX30 Single Motor ER", price: 1590000, battery: 69, range: 480, motor: 200, ac: 11, dc: 153, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Volvo", model: "EX30 Twin Motor Performance", price: 1890000, battery: 69, range: 460, motor: 315, ac: 11, dc: 153, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Volvo", model: "EX40 Twin Motor", price: 1990000, oldPrice: 2390000, battery: 78, range: 460, motor: 300, ac: 11, dc: 200, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Volvo", model: "EC40 Twin Motor", price: 2090000, oldPrice: 2590000, battery: 78, range: 450, motor: 300, ac: 11, dc: 200, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV Coupe" },
+  { brand: "Volvo", model: "EX90 Twin Motor", price: 4290000, oldPrice: 4990000, battery: 111, range: 600, motor: 300, ac: 11, dc: 250, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+
+  // BMW — i5 CKD massive cut
+  { brand: "BMW", model: "iX1 xDrive30", price: 2499000, oldPrice: 2999000, battery: 64.7, range: 440, motor: 230, ac: 11, dc: 130, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "BMW", model: "iX3 M Sport (NA5)", price: 3459000, oldPrice: 3699000, battery: 80, range: 460, motor: 210, ac: 11, dc: 150, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "BMW", model: "i4 eDrive40 M Sport", price: 3789000, oldPrice: 3899000, battery: 83.9, range: 590, motor: 250, ac: 11, dc: 205, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "BMW", model: "i5 eDrive40 M Sport (CKD)", price: 3499000, oldPrice: 4999000, battery: 84, range: 580, motor: 250, ac: 11, dc: 205, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "BMW", model: "iX xDrive40", price: 4999000, battery: 76.6, range: 425, motor: 240, ac: 11, dc: 150, warrantyCar: "5 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+
+  // Mercedes-Benz — Major cuts on EQE/EQS
+  { brand: "Mercedes-Benz", model: "EQA 250", price: 2790000, battery: 70.5, range: 426, motor: 140, ac: 11, dc: 100, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Mercedes-Benz", model: "EQB 250+ AMG Line", price: 2990000, battery: 70.5, range: 430, motor: 140, ac: 11, dc: 100, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV (7 seat)" },
+  { brand: "Mercedes-Benz", model: "EQE 300 Sedan", price: 2890000, oldPrice: 4290000, battery: 90.6, range: 654, motor: 215, ac: 11, dc: 170, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "Mercedes-Benz", model: "EQS 450+ AMG Dynamic", price: 4590000, oldPrice: 6990000, battery: 107.8, range: 716, motor: 245, ac: 22, dc: 200, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "10 ปี / 250,000 km", type: "Sedan" },
+
+  // Hyundai — Aggressive discounts
+  { brand: "Hyundai", model: "Ioniq 5 SE", price: 1299000, oldPrice: 1849000, battery: 58, range: 384, motor: 125, ac: 11, dc: 220, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Hyundai", model: "Ioniq 5 Lite Long Range", price: 1699000, oldPrice: 1999000, battery: 77.4, range: 481, motor: 168, ac: 11, dc: 233, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Hyundai", model: "Ioniq 6 Exclusive", price: 1729000, oldPrice: 1989000, battery: 77.4, range: 545, motor: 168, ac: 11, dc: 233, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+
+  // Kia
+  { brand: "Kia", model: "EV6 GT-Line AWD", price: 2599000, battery: 77.4, range: 506, motor: 239, ac: 11, dc: 233, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Kia", model: "EV9 GT-Line AWD", price: 3899000, battery: 99.8, range: 505, motor: 283, ac: 11, dc: 210, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV 7 seat" },
+
+  // XPeng — Major refresh
+  { brand: "XPeng", model: "G6 Standard Range (MC)", price: 1189000, oldPrice: 1599000, battery: 66, range: 580, motor: 218, ac: 11, dc: 215, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "XPeng", model: "G6 Long Range", price: 1439000, oldPrice: 1799000, battery: 87.5, range: 755, motor: 218, ac: 11, dc: 280, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "XPeng", model: "G6 Performance AWD", price: 1599000, oldPrice: 1969000, battery: 87.5, range: 700, motor: 358, ac: 11, dc: 280, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "XPeng", model: "G9 Performance", price: 2399000, battery: 98, range: 702, motor: 405, ac: 11, dc: 300, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+
+  // Deepal / Changan
+  { brand: "Deepal", model: "S07", price: 1099000, oldPrice: 1259000, battery: 79.97, range: 620, motor: 160, ac: 7, dc: 92, warrantyCar: "8 ปี / 180,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "SUV" },
+  { brand: "Deepal", model: "L07", price: 1329000, battery: 79.97, range: 580, motor: 160, ac: 7, dc: 92, warrantyCar: "8 ปี / 180,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Sedan" },
+  { brand: "Changan", model: "Lumin", price: 409000, oldPrice: 479000, battery: 27.99, range: 255, motor: 30, ac: 3.3, dc: 30, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "City Car" },
+  { brand: "Changan", model: "E07 Plus", price: 1649000, battery: 95, range: 700, motor: 230, ac: 11, dc: 150, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV/Pickup" },
+
+  // Zeekr — Big cut
+  { brand: "Zeekr", model: "X (MY2026)", price: 899000, oldPrice: 1399000, battery: 66, range: 560, motor: 200, ac: 11, dc: 150, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Zeekr", model: "001 Long Range", price: 1999000, battery: 100, range: 741, motor: 200, ac: 22, dc: 200, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan/Shooting" },
+
+  // Wuling
+  { brand: "Wuling", model: "Bingo Premium", price: 399000, oldPrice: 549000, battery: 37.9, range: 410, motor: 50, ac: 6.6, dc: 40, warrantyCar: "8 ปี / 180,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "City Car" },
+  { brand: "Wuling", model: "Air EV", price: 339000, oldPrice: 399000, battery: 26.7, range: 300, motor: 30, ac: 3.5, dc: 0, warrantyCar: "8 ปี / 180,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "Micro EV" },
+
+  // Haval PHEV
+  { brand: "Haval", model: "H6 PHEV Ultra", price: 1599000, battery: 34.1, range: 1000, motor: 240, ac: 7, dc: 48, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 180,000 km", type: "SUV (PHEV)" },
+
+  // Japan
+  { brand: "Toyota", model: "bZ4X (MC 2026)", price: 1529000, oldPrice: 1836000, battery: 71.4, range: 411, motor: 150, ac: 6.6, dc: 150, warrantyCar: "3 ปี / 100,000 km", warrantyBattery: "10 ปี / 1,000,000 km", type: "SUV" },
+  { brand: "Honda", model: "e:N1 (Dealer Discount)", price: 899000, oldPrice: 1259000, battery: 68.8, range: 500, motor: 150, ac: 6.6, dc: 78, warrantyCar: "3 ปี / 100,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Nissan", model: "Leaf", price: 1690000, battery: 40, range: 311, motor: 110, ac: 6.6, dc: 50, warrantyCar: "3 ปี / 100,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Hatchback" },
+
+  // Mini
+  { brand: "Mini", model: "Cooper SE", price: 2399000, battery: 54.2, range: 402, motor: 160, ac: 11, dc: 95, warrantyCar: "3 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Hatchback" },
+
+  // Premium
+  { brand: "Porsche", model: "Macan 4 Electric", price: 5800000, battery: 95, range: 613, motor: 285, ac: 11, dc: 270, warrantyCar: "2 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Porsche", model: "Taycan 4S", price: 7900000, battery: 105, range: 642, motor: 320, ac: 11, dc: 320, warrantyCar: "2 ปี / ไม่จำกัด km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+  { brand: "Audi", model: "Q4 e-tron 45", price: 3599000, battery: 82, range: 521, motor: 210, ac: 11, dc: 175, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "SUV" },
+  { brand: "Audi", model: "e-tron GT quattro", price: 6390000, oldPrice: 6990000, battery: 93.4, range: 488, motor: 350, ac: 11, dc: 270, warrantyCar: "5 ปี / 150,000 km", warrantyBattery: "8 ปี / 160,000 km", type: "Sedan" },
+];
+
+// ============================================================================
+// STATE & RENDERING
+// ============================================================================
+let selected = new Set();
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
+const brandFilter = document.getElementById("brandFilter");
+const sortBy = document.getElementById("sortBy");
+const promoFilter = document.getElementById("promoFilter");
+
+function priceFmt(n) {
+  return "฿" + n.toLocaleString("en-US");
+}
+function saveFmt(n) {
+  if (n >= 1000000) return "฿" + (n/1000000).toFixed(2) + "M";
+  if (n >= 1000) return "฿" + Math.round(n/1000) + "k";
+  return "฿" + n;
+}
+
+function uniqueBrands() {
+  return [...new Set(EVS.map(e => e.brand))].sort();
+}
+
+function populateBrandFilter() {
+  uniqueBrands().forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b; opt.textContent = b;
+    brandFilter.appendChild(opt);
+  });
+}
+
+function savings(c) {
+  return c.oldPrice ? c.oldPrice - c.price : 0;
+}
+
+function filterAndSort() {
+  const q = search.value.trim().toLowerCase();
+  const bf = brandFilter.value;
+  const pf = promoFilter.value;
+  let list = EVS.filter(e => {
+    const matchQ = !q || e.model.toLowerCase().includes(q) || e.brand.toLowerCase().includes(q);
+    const matchB = !bf || e.brand === bf;
+    const matchP = !pf || (pf === "promo" && e.oldPrice);
+    return matchQ && matchB && matchP;
+  });
+  const s = sortBy.value;
+  list.sort((a, b) => {
+    if (s === "price-asc") return a.price - b.price;
+    if (s === "price-desc") return b.price - a.price;
+    if (s === "save-desc") return savings(b) - savings(a);
+    if (s === "range-desc") return b.range - a.range;
+    if (s === "battery-desc") return b.battery - a.battery;
+    return 0;
+  });
+  return list;
+}
+
+function carId(c) { return c.brand + "::" + c.model; }
+
+function renderGrid() {
+  const list = filterAndSort();
+  grid.innerHTML = "";
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty"><h3>ไม่พบรถที่ค้นหา</h3><p>ลองเปลี่ยนคำค้นหรือเลือกแบรนด์อื่น</p></div>';
+    return;
+  }
+  list.forEach(c => {
+    const isSel = selected.has(carId(c));
+    const save = savings(c);
+    const hasPromo = save > 0;
+    const div = document.createElement("div");
+    div.className = "card" + (hasPromo ? " has-promo" : "");
+    const priceBlock = hasPromo
+      ? `<div class="price-block">
+           <span class="price-old">${priceFmt(c.oldPrice)}</span>
+           <div class="price-current">
+             ${priceFmt(c.price)}
+             <span class="save-badge">ลด ${saveFmt(save)}</span>
+           </div>
+         </div>`
+      : `<div class="price-block">
+           <div class="price-current">${priceFmt(c.price)}</div>
+         </div>`;
+    div.innerHTML = `
+      <div class="brand">${c.brand} <span style="color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0;">· ${c.type}</span></div>
+      <div class="model">${c.model}</div>
+      ${priceBlock}
+      <div class="specs">
+        <div class="spec-label">แบตเตอรี่</div><div class="spec-val">${c.battery} kWh</div>
+        <div class="spec-label">ระยะทาง</div><div class="spec-val">${c.range} km</div>
+        <div class="spec-label">มอเตอร์</div><div class="spec-val">${c.motor} kW</div>
+        <div class="spec-label">AC / DC</div><div class="spec-val">${c.ac} / ${c.dc} kW</div>
+        <div class="spec-label">รับประกันรถ</div><div class="spec-val">${c.warrantyCar}</div>
+        <div class="spec-label">รับประกันแบต</div><div class="spec-val">${c.warrantyBattery}</div>
+      </div>
+      <div class="actions">
+        <button class="btn ${isSel ? 'selected' : 'primary'}" onclick="toggleSelect('${carId(c).replace(/'/g,"\\'")}')">
+          ${isSel ? '✓ เลือกแล้ว' : '+ เปรียบเทียบ'}
+        </button>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function toggleSelect(id) {
+  if (selected.has(id)) selected.delete(id);
+  else {
+    if (selected.size >= 4) {
+      alert("เลือกได้สูงสุด 4 คัน — กรุณายกเลิกบางคันก่อน");
+      return;
+    }
+    selected.add(id);
+  }
+  renderGrid();
+  updateCompareBar();
+}
+
+function clearSelection() {
+  selected.clear();
+  renderGrid();
+  updateCompareBar();
+}
+
+function updateCompareBar() {
+  const bar = document.getElementById("compareBar");
+  const cnt = document.getElementById("compareBarCount");
+  const cmpBadge = document.getElementById("cmpCount");
+  cnt.textContent = selected.size;
+  cmpBadge.textContent = selected.size;
+  if (selected.size > 0) {
+    bar.classList.add("show");
+    cmpBadge.style.display = "inline-block";
+  } else {
+    bar.classList.remove("show");
+    cmpBadge.style.display = "none";
+  }
+}
+
+// ============================================================================
+// TAB SWITCHING
+// ============================================================================
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    const target = t.dataset.tab;
+    document.getElementById("listSection").classList.toggle("active", target === "list");
+    document.getElementById("compareSection").classList.toggle("active", target === "compare");
+    if (target === "compare") renderCompare();
+  });
+});
+
+function goCompare() {
+  document.querySelector('.tab[data-tab="compare"]').click();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ============================================================================
+// COMPARISON RENDERING
+// ============================================================================
+function renderCompare() {
+  const content = document.getElementById("compareContent");
+  const desc = document.getElementById("compareDesc");
+  const cars = EVS.filter(c => selected.has(carId(c)));
+
+  if (cars.length === 0) {
+    desc.textContent = "เลือกรถจากหน้ารายการเพื่อนำมาเปรียบเทียบที่นี่";
+    content.innerHTML = `
+      <div class="empty">
+        <h3>ยังไม่มีรถที่เลือก</h3>
+        <p>กลับไปที่หน้า "รายการรถ" แล้วกดปุ่ม "+ เปรียบเทียบ" เพื่อเลือกรถได้สูงสุด 4 คัน</p>
+        <button class="btn primary" style="margin-top:16px;max-width:200px;" onclick="document.querySelector('.tab[data-tab=&quot;list&quot;]').click()">← กลับหน้ารายการ</button>
+      </div>
+    `;
+    return;
+  }
+
+  desc.textContent = `เปรียบเทียบ ${cars.length} คัน — ตัวเลข สีเขียว = ดีที่สุดในแถวนั้น`;
+
+  const minOf = key => Math.min(...cars.map(c => c[key]));
+  const maxOf = key => Math.max(...cars.map(c => c[key]));
+
+  cars.forEach(c => {
+    c._costPerKm = (c.battery * 4.5) / c.range;
+    c._save = savings(c);
+  });
+
+  const rows = [
+    { label: "ราคาปัจจุบัน (บาท)", key: "price", best: "min", format: priceFmt },
+    { label: "ราคาเปิดตัว", key: "oldPrice", best: null, format: v => v ? priceFmt(v) : "—" },
+    { label: "ส่วนลดโปร", key: "_save", best: "max", format: v => v > 0 ? `ลด ${saveFmt(v)}` : "—" },
+    { label: "ประเภท", key: "type", best: null },
+    { label: "ความจุแบตเตอรี่ (kWh)", key: "battery", best: "max", format: v => v + " kWh" },
+    { label: "ระยะทาง / 1 ชาร์จ (km)", key: "range", best: "max", format: v => v + " km" },
+    { label: "กำลังมอเตอร์ (kW)", key: "motor", best: "max", format: v => v + " kW" },
+    { label: "ชาร์จ AC (kW)", key: "ac", best: "max", format: v => v + " kW" },
+    { label: "ชาร์จเร็ว DC (kW)", key: "dc", best: "max", format: v => v + " kW" },
+    { label: "ค่าไฟต่อ km*", key: "_costPerKm", best: "min", format: v => "฿" + v.toFixed(2) + " / km" },
+    { label: "รับประกันตัวรถ", key: "warrantyCar", best: null },
+    { label: "รับประกันแบตเตอรี่", key: "warrantyBattery", best: null },
+  ];
+
+  let html = '<div class="compare-table-wrap"><table class="compare"><thead><tr><th>หัวข้อ</th>';
+  cars.forEach(c => {
+    const safeId = carId(c).replace(/'/g,"\\'");
+    html += `<th>
+      <div class="car-brand">${c.brand}</div>
+      <div class="car-name">${c.model}</div>
+      <button class="btn-interest" onclick="openModal('${safeId}')">💚 สนใจรุ่นนี้</button>
+      <button class="remove-btn" onclick="toggleSelect('${safeId}'); renderCompare();">× เอาออก</button>
+    </th>`;
+  });
+  html += "</tr></thead><tbody>";
+
+  rows.forEach(r => {
+    html += `<tr><td class="label">${r.label}</td>`;
+    let bestVal = null;
+    if (r.best === "min" && typeof cars[0][r.key] === "number") {
+      const nums = cars.map(c => c[r.key]).filter(v => typeof v === "number" && v > 0);
+      if (nums.length > 0) bestVal = Math.min(...nums);
+    }
+    if (r.best === "max" && typeof cars[0][r.key] === "number") {
+      const nums = cars.map(c => c[r.key]).filter(v => typeof v === "number" && v > 0);
+      if (nums.length > 0) bestVal = Math.max(...nums);
+    }
+    cars.forEach(c => {
+      const raw = c[r.key];
+      const display = r.format ? r.format(raw) : (raw == null ? "—" : raw);
+      const isBest = bestVal !== null && raw === bestVal && cars.length > 1 && bestVal > 0;
+      html += `<td class="${isBest ? 'best' : ''}">${display}${isBest ? ' ★' : ''}</td>`;
+    });
+    html += "</tr>";
+  });
+
+  html += "</tbody></table></div>";
+
+  // Summary
+  html += '<div style="margin-top:24px;padding:18px;background:var(--card);border:1px solid var(--border);border-radius:16px;">';
+  html += '<h3 style="margin:0 0 12px;font-size:16px;">📊 สรุปการเปรียบเทียบ</h3>';
+  const cheapest = cars.reduce((a, b) => a.price < b.price ? a : b);
+  const longest = cars.reduce((a, b) => a.range > b.range ? a : b);
+  const fastest = cars.reduce((a, b) => a.motor > b.motor ? a : b);
+  const efficient = cars.reduce((a, b) => a._costPerKm < b._costPerKm ? a : b);
+  const bestDeal = cars.reduce((a, b) => savings(a) > savings(b) ? a : b);
+  html += `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+      <div style="background:var(--bg-2);padding:14px;border-radius:10px;">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">💰 ราคาถูกที่สุด</div>
+        <div style="font-weight:700;margin-top:4px;">${cheapest.brand} ${cheapest.model}</div>
+        <div style="color:var(--accent);font-weight:800;margin-top:2px;">${priceFmt(cheapest.price)}</div>
+      </div>
+      <div style="background:var(--bg-2);padding:14px;border-radius:10px;">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">🛣️ ระยะทางมากที่สุด</div>
+        <div style="font-weight:700;margin-top:4px;">${longest.brand} ${longest.model}</div>
+        <div style="color:var(--accent);font-weight:800;margin-top:2px;">${longest.range} km</div>
+      </div>
+      <div style="background:var(--bg-2);padding:14px;border-radius:10px;">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">⚡ แรงม้ามากที่สุด</div>
+        <div style="font-weight:700;margin-top:4px;">${fastest.brand} ${fastest.model}</div>
+        <div style="color:var(--accent);font-weight:800;margin-top:2px;">${fastest.motor} kW (${Math.round(fastest.motor*1.341)} hp)</div>
+      </div>
+      <div style="background:var(--bg-2);padding:14px;border-radius:10px;">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">💵 ประหยัดที่สุด</div>
+        <div style="font-weight:700;margin-top:4px;">${efficient.brand} ${efficient.model}</div>
+        <div style="color:var(--accent);font-weight:800;margin-top:2px;">฿${efficient._costPerKm.toFixed(2)} / km</div>
+      </div>
+      ${savings(bestDeal) > 0 ? `<div style="background:var(--bg-2);padding:14px;border-radius:10px;border:1px solid rgba(251,191,36,0.3);">
+        <div style="font-size:11px;color:var(--warn);text-transform:uppercase;letter-spacing:1px;">🔥 โปรลดมากสุด</div>
+        <div style="font-weight:700;margin-top:4px;">${bestDeal.brand} ${bestDeal.model}</div>
+        <div style="color:var(--warn);font-weight:800;margin-top:2px;">ลด ${saveFmt(savings(bestDeal))}</div>
+      </div>` : ''}
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:var(--muted);">* คำนวณค่าไฟที่ ฿4.50 / kWh (อัตราที่บ้านทั่วไป) — ค่าจริงอาจต่ำกว่านี้ถ้าใช้ TOU On-Peak/Off-Peak</div>
+  </div>`;
+
+  content.innerHTML = html;
+}
+
+// ============================================================================
+// INTEREST MODAL & LEADS
+// ============================================================================
+const LEADS_KEY = "ev_thailand_leads_v1";
+let currentTargetId = null;
+
+function loadLeads() {
+  try { return JSON.parse(localStorage.getItem(LEADS_KEY)) || []; }
+  catch (e) { return []; }
+}
+function saveLeads(leads) {
+  localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
+  updateLeadCount();
+}
+function updateLeadCount() {
+  document.getElementById("leadCountBadge").textContent = loadLeads().length;
+}
+
+function openModal(carIdStr) {
+  currentTargetId = carIdStr;
+  const car = EVS.find(c => carId(c) === carIdStr);
+  if (!car) return;
+  document.getElementById("modalTarget").innerHTML =
+    `สนใจรุ่น: <b>${car.brand} ${car.model}</b><br/>ราคา ${priceFmt(car.price)}${car.oldPrice ? ` (จากเดิม ${priceFmt(car.oldPrice)})` : ""}`;
+  document.getElementById("modalForm").style.display = "block";
+  document.getElementById("modalSuccess").style.display = "none";
+  document.getElementById("formError").style.display = "none";
+  ["f-name","f-phone","f-email","f-gender","f-age"].forEach(id => document.getElementById(id).classList.remove("invalid"));
+  ["inp-name","inp-phone","inp-email","inp-gender","inp-age"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("modalBackdrop").classList.add("show");
+  setTimeout(() => document.getElementById("inp-name").focus(), 100);
+}
+function closeModal() {
+  document.getElementById("modalBackdrop").classList.remove("show");
+  currentTargetId = null;
+}
+
+function validate() {
+  // ตัด validation เข้มงวดออก — เหลือแค่ชื่อต้องกรอก
+  const name = (document.getElementById("inp-name").value || "").trim();
+  const phone = (document.getElementById("inp-phone").value || "").trim();
+  const email = (document.getElementById("inp-email").value || "").trim();
+  const gender = document.getElementById("inp-gender").value || "";
+  const ageRaw = document.getElementById("inp-age").value;
+  const age = ageRaw ? parseInt(ageRaw, 10) : null;
+
+  // เคลียร์ invalid state ทุกฟิลด์ก่อน
+  ["f-name","f-phone","f-email","f-gender","f-age"].forEach(id => {
+    document.getElementById(id).classList.remove("invalid");
+  });
+
+  // เช็คแค่ชื่อ
+  if (name.length < 1) {
+    document.getElementById("f-name").classList.add("invalid");
+    return null;
+  }
+  return { name, phone, email, gender, age };
+}
+
+function submitInterest() {
+  try {
+    console.log("[submitInterest] called");
+    const data = validate();
+    console.log("[submitInterest] validate result:", data);
+    if (!data) {
+      document.getElementById("formError").style.display = "block";
+      const firstInvalid = document.querySelector(".field.invalid input, .field.invalid select");
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+    document.getElementById("formError").style.display = "none";
+    const car = EVS.find(c => carId(c) === currentTargetId);
+    const lead = {
+      ...data,
+      brand: car ? car.brand : "",
+      model: car ? car.model : "",
+      price: car ? car.price : 0,
+      timestamp: new Date().toISOString(),
+    };
+    console.log("[submitInterest] saving lead:", lead);
+    const leads = loadLeads();
+    leads.push(lead);
+    saveLeads(leads);
+    document.getElementById("modalForm").style.display = "none";
+    document.getElementById("modalSuccess").style.display = "block";
+    console.log("[submitInterest] success");
+  } catch (err) {
+    console.error("[submitInterest] ERROR:", err);
+    alert("เกิดข้อผิดพลาด: " + err.message + "\nกรุณาเปิด Console (F12) เพื่อดูรายละเอียด");
+  }
+}
+
+// ตัด phone auto-format ออก — ให้ user กรอกแบบไหนก็ได้
+
+// ============================================================================
+// LEADS ADMIN
+// ============================================================================
+function openLeads() {
+  renderLeadsTable();
+  document.getElementById("leadsBackdrop").classList.add("show");
+}
+function closeLeads() {
+  document.getElementById("leadsBackdrop").classList.remove("show");
+}
+function renderLeadsTable() {
+  const leads = loadLeads();
+  const wrap = document.getElementById("leadsContent");
+  if (leads.length === 0) {
+    wrap.innerHTML = '<div class="empty" style="padding:30px;"><h3>ยังไม่มีข้อมูล Leads</h3><p>เมื่อมีคนกดปุ่ม "สนใจ" และกรอกฟอร์ม ข้อมูลจะมาแสดงที่นี่</p></div>';
+    return;
+  }
+  let html = '<div style="overflow-x:auto;max-height:50vh;"><table class="leads-table"><thead><tr>';
+  html += '<th>วันที่</th><th>ชื่อ</th><th>เบอร์</th><th>อีเมล</th><th>เพศ</th><th>อายุ</th><th>รุ่นที่สนใจ</th>';
+  html += '</tr></thead><tbody>';
+  leads.slice().reverse().forEach(l => {
+    const dt = new Date(l.timestamp);
+    const dateStr = dt.toLocaleDateString("th-TH") + " " + dt.toLocaleTimeString("th-TH", { hour: '2-digit', minute: '2-digit' });
+    html += `<tr>
+      <td style="color:var(--muted);">${dateStr}</td>
+      <td><b>${escapeHtml(l.name)}</b></td>
+      <td>${escapeHtml(l.phone)}</td>
+      <td>${escapeHtml(l.email)}</td>
+      <td>${escapeHtml(l.gender)}</td>
+      <td>${l.age}</td>
+      <td>${escapeHtml(l.brand)} ${escapeHtml(l.model)}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  html += `<div style="margin-top:10px;font-size:12px;color:var(--muted);">รวม ${leads.length} รายการ</div>`;
+  wrap.innerHTML = html;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function exportLeadsCSV() {
+  const leads = loadLeads();
+  if (leads.length === 0) { alert("ยังไม่มีข้อมูลให้ export"); return; }
+  const headers = ["timestamp","name","phone","email","gender","age","brand","model","price"];
+  const rows = [headers.join(",")];
+  leads.forEach(l => {
+    const row = headers.map(h => {
+      let v = l[h] == null ? "" : String(l[h]);
+      if (v.includes(",") || v.includes('"') || v.includes("\n")) {
+        v = '"' + v.replace(/"/g, '""') + '"';
+      }
+      return v;
+    });
+    rows.push(row.join(","));
+  });
+  const csv = "﻿" + rows.join("\n"); // BOM for Excel UTF-8
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `ev-leads-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function clearLeads() {
+  if (!confirm("ยืนยันลบข้อมูล Leads ทั้งหมด? (ไม่สามารถกู้คืนได้)")) return;
+  localStorage.removeItem(LEADS_KEY);
+  updateLeadCount();
+  renderLeadsTable();
+}
+
+// Close modals on Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeModal();
+    closeLeads();
+  }
+});
+
+// ============================================================================
+// INIT
+// ============================================================================
+populateBrandFilter();
+renderGrid();
+updateLeadCount();
+search.addEventListener("input", renderGrid);
+brandFilter.addEventListener("change", renderGrid);
+sortBy.addEventListener("change", renderGrid);
+promoFilter.addEventListener("change", renderGrid);
+</script>
+
+</body>
+</html>
