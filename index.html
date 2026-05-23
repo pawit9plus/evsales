@@ -100,6 +100,23 @@
     background: var(--card); border: 1px solid var(--border); border-radius: 16px;
     padding: 18px; transition: all 0.2s; position: relative; overflow: hidden;
   }
+  .car-image {
+    width: 100%; aspect-ratio: 16/10; object-fit: cover;
+    border-radius: 12px; background: var(--bg-2); margin-bottom: 14px;
+    display: block; transition: opacity 0.3s;
+  }
+  .car-image.loading {
+    background: linear-gradient(90deg, #1c2340 25%, #2a3358 50%, #1c2340 75%);
+    background-size: 200% 100%; animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .compare-img {
+    width: 100%; max-width: 220px; aspect-ratio: 16/10; object-fit: cover;
+    border-radius: 8px; background: var(--bg-2); margin: 6px 0 8px;
+  }
   .card:hover { transform: translateY(-2px); border-color: var(--accent-2); }
   .card.has-promo { border-color: rgba(251,191,36,0.4); }
   .card.has-promo::before {
@@ -575,6 +592,92 @@ const EVS = [
 ];
 
 // ============================================================================
+// IMAGE LOADING — Wikipedia REST API + localStorage cache
+// ============================================================================
+const IMG_CACHE_KEY = "ev_img_cache_v1";
+function getImgCache() {
+  try { return JSON.parse(localStorage.getItem(IMG_CACHE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveImgCache(cache) {
+  try { localStorage.setItem(IMG_CACHE_KEY, JSON.stringify(cache)); } catch {}
+}
+function escAttr(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function placeholderImg(c) {
+  const text = encodeURIComponent(c.brand + "\n" + c.model.split("(")[0].trim());
+  return `https://placehold.co/600x375/161c33/4ade80?text=${text}`;
+}
+
+async function fetchCarImage(brand, model) {
+  const cache = getImgCache();
+  const key = brand + "::" + model;
+  if (key in cache) return cache[key];
+
+  // ลองหลายแบบ query
+  const cleanModel = model.replace(/\(.*?\)/g, "").trim();
+  const queries = [
+    brand + " " + cleanModel,
+    brand.replace(/\s+/g, "_") + "_" + cleanModel.replace(/\s+/g, "_"),
+    cleanModel,
+  ];
+
+  for (const q of queries) {
+    try {
+      const url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(q);
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.thumbnail && data.thumbnail.source) {
+        const imgUrl = (data.originalimage && data.originalimage.source) || data.thumbnail.source;
+        cache[key] = imgUrl;
+        saveImgCache(cache);
+        return imgUrl;
+      }
+    } catch (e) { /* network / CORS — try next query */ }
+  }
+
+  // cache failure (null) เพื่อไม่ยิงซ้ำ
+  cache[key] = null;
+  saveImgCache(cache);
+  return null;
+}
+
+let imgObserver = null;
+function setupImageLazyLoad() {
+  if (imgObserver) imgObserver.disconnect();
+  imgObserver = new IntersectionObserver(async (entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const img = entry.target;
+      imgObserver.unobserve(img);
+      const brand = img.dataset.brand;
+      const model = img.dataset.model;
+      if (!brand || !model) continue;
+      const url = await fetchCarImage(brand, model);
+      if (url) {
+        const test = new Image();
+        test.onload = () => {
+          img.src = url;
+          img.classList.remove("loading");
+        };
+        test.onerror = () => {
+          img.classList.remove("loading");
+        };
+        test.src = url;
+      } else {
+        img.classList.remove("loading");
+      }
+    }
+  }, { rootMargin: "300px" });
+
+  document.querySelectorAll("img.car-image[data-brand]").forEach(img => {
+    imgObserver.observe(img);
+  });
+}
+
+// ============================================================================
 // STATE & RENDERING
 // ============================================================================
 let selected = new Set();
@@ -658,6 +761,13 @@ function renderGrid() {
            <div class="price-current">${priceFmt(c.price)}</div>
          </div>`;
     div.innerHTML = `
+      <img class="car-image loading"
+           src="${placeholderImg(c)}"
+           data-brand="${escAttr(c.brand)}"
+           data-model="${escAttr(c.model)}"
+           alt="${escAttr(c.brand + ' ' + c.model)}"
+           loading="lazy"
+           onerror="this.onerror=null;this.src='${placeholderImg(c)}';this.classList.remove('loading');">
       <div class="brand">${c.brand} <span style="color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0;">· ${c.type}</span></div>
       <div class="model">${c.model}</div>
       ${priceBlock}
@@ -677,6 +787,7 @@ function renderGrid() {
     `;
     grid.appendChild(div);
   });
+  setupImageLazyLoad();
 }
 
 function toggleSelect(id) {
@@ -781,6 +892,13 @@ function renderCompare() {
   cars.forEach(c => {
     const safeId = carId(c).replace(/'/g,"\\'");
     html += `<th>
+      <img class="compare-img car-image loading"
+           src="${placeholderImg(c)}"
+           data-brand="${escAttr(c.brand)}"
+           data-model="${escAttr(c.model)}"
+           alt="${escAttr(c.brand + ' ' + c.model)}"
+           loading="lazy"
+           onerror="this.onerror=null;this.src='${placeholderImg(c)}';this.classList.remove('loading');">
       <div class="car-brand">${c.brand}</div>
       <div class="car-name">${c.model}</div>
       <button class="btn-interest" onclick="openModal('${safeId}')">💚 สนใจรุ่นนี้</button>
@@ -851,6 +969,7 @@ function renderCompare() {
   </div>`;
 
   content.innerHTML = html;
+  setupImageLazyLoad();
 }
 
 // ============================================================================
