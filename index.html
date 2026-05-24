@@ -514,8 +514,8 @@
   </div>
 </div>
 
-<button class="leads-link hidden" id="adminLink" onclick="openLeads()">
-  📋 Leads <span class="lead-count" id="leadCountBadge">0</span>
+<button class="leads-link" id="adminLink" onclick="openLeads()" title="กดเพื่อดูข้อมูล Leads (ต้องมีรหัส admin)">
+  📋 Leads <span class="lead-count" id="leadCountBadge">🔒</span>
 </button>
 
 <footer>
@@ -1151,7 +1151,12 @@ function saveLeads(leads) {
   updateLeadCount();
 }
 function updateLeadCount() {
-  document.getElementById("leadCountBadge").textContent = loadLeads().length;
+  const badge = document.getElementById("leadCountBadge");
+  if (typeof isAdmin === "function" && isAdmin()) {
+    badge.textContent = loadLeads().length;
+  } else {
+    badge.textContent = "🔒";
+  }
 }
 
 function openModal(carIdStr) {
@@ -1245,10 +1250,12 @@ function isAdmin() {
   return localStorage.getItem(ADMIN_SESSION_KEY) === "1";
 }
 function showAdminUI() {
-  document.getElementById("adminLink").classList.remove("hidden");
+  // ปุ่ม Leads อยู่ตลอด — แค่อัพเดท badge ให้แสดงจำนวน
+  updateLeadCount();
 }
 function hideAdminUI() {
-  document.getElementById("adminLink").classList.add("hidden");
+  // ปุ่ม Leads ยังอยู่ — แสดง 🔒 แทนจำนวน
+  updateLeadCount();
 }
 function openAdminLogin() {
   document.getElementById("adminPassword").value = "";
