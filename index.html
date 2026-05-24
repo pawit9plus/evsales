@@ -318,6 +318,18 @@
     z-index: 30; box-shadow: 0 8px 24px rgba(0,0,0,0.3); font-family: inherit;
   }
   .leads-link:hover { background: var(--card); }
+  .leads-link.hidden { display: none; }
+  .admin-badge {
+    display: inline-block; background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white; padding: 2px 8px; border-radius: 999px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.5px; margin-left: 8px;
+  }
+  .btn-logout {
+    background: transparent; color: var(--danger);
+    border: 1px solid var(--danger); padding: 6px 12px; border-radius: 8px;
+    cursor: pointer; font-size: 12px; font-weight: 600; font-family: inherit;
+  }
+  .btn-logout:hover { background: rgba(248,113,113,0.1); }
   .leads-link .lead-count {
     background: var(--accent); color: #0b1020; padding: 2px 8px;
     border-radius: 999px; font-weight: 800; margin-left: 6px; font-size: 11px;
@@ -470,18 +482,39 @@
 <!-- LEADS ADMIN MODAL -->
 <div class="modal-backdrop" id="leadsBackdrop" onclick="if(event.target===this) closeLeads()">
   <div class="modal" style="max-width:760px;">
-    <h2>📋 รายการ Leads ที่เก็บไว้</h2>
+    <h2>📋 รายการ Leads ที่เก็บไว้ <span class="admin-badge">ADMIN</span></h2>
     <div class="sub">ข้อมูลที่ลูกค้าลงทะเบียนความสนใจ — บันทึกใน browser localStorage</div>
     <div id="leadsContent"></div>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeLeads()">ปิด</button>
       <button class="btn" onclick="exportLeadsCSV()" style="background:var(--accent-2);border:none;color:#0b1020;">⬇ Export CSV</button>
       <button class="btn" onclick="clearLeads()" style="background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid var(--danger);">🗑 ล้างข้อมูล</button>
+      <button class="btn-logout" onclick="logoutAdmin()">🚪 ออกจากระบบ</button>
     </div>
   </div>
 </div>
 
-<button class="leads-link" onclick="openLeads()">
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-backdrop" id="adminBackdrop" onclick="if(event.target===this) closeAdminLogin()">
+  <div class="modal" style="max-width:400px;">
+    <h2>🔐 Admin Login</h2>
+    <div class="sub">เข้าสู่ระบบเพื่อดูข้อมูล Leads ที่ลูกค้าลงทะเบียนไว้</div>
+    <div class="field" id="f-adminPass">
+      <label>รหัสผ่าน</label>
+      <input id="adminPassword" type="password" placeholder="ใส่รหัสผ่าน admin" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginAdmin()" />
+      <div class="error">รหัสผ่านไม่ถูกต้อง</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeAdminLogin()">ยกเลิก</button>
+      <button class="btn btn-submit" onclick="loginAdmin()">เข้าสู่ระบบ</button>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center;">
+      💡 รหัสผ่าน default: <code style="background:var(--bg-2);padding:2px 6px;border-radius:4px;">admin1234</code> — เปลี่ยนได้ใน source code (ตัวแปร ADMIN_HASH)
+    </div>
+  </div>
+</div>
+
+<button class="leads-link hidden" id="adminLink" onclick="openLeads()">
   📋 Leads <span class="lead-count" id="leadCountBadge">0</span>
 </button>
 
@@ -1198,9 +1231,86 @@ function submitInterest() {
 // ตัด phone auto-format ออก — ให้ user กรอกแบบไหนก็ได้
 
 // ============================================================================
+// ADMIN AUTHENTICATION
+// ============================================================================
+// SHA-256 hash ของ "admin1234" — เปลี่ยนรหัส: คำนวณ hash ใหม่ที่ https://emn178.github.io/online-tools/sha256.html
+const ADMIN_HASH = "ac9689e2272427085e35b9d3e3e8bed88cb3434828b43b86fc0596cad4c6e270";
+const ADMIN_SESSION_KEY = "ev_admin_session_v1";
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+function isAdmin() {
+  return localStorage.getItem(ADMIN_SESSION_KEY) === "1";
+}
+function showAdminUI() {
+  document.getElementById("adminLink").classList.remove("hidden");
+}
+function hideAdminUI() {
+  document.getElementById("adminLink").classList.add("hidden");
+}
+function openAdminLogin() {
+  document.getElementById("adminPassword").value = "";
+  document.getElementById("f-adminPass").classList.remove("invalid");
+  document.getElementById("adminBackdrop").classList.add("show");
+  setTimeout(() => document.getElementById("adminPassword").focus(), 100);
+}
+function closeAdminLogin() {
+  document.getElementById("adminBackdrop").classList.remove("show");
+}
+async function loginAdmin() {
+  const pw = document.getElementById("adminPassword").value;
+  try {
+    const hash = await sha256(pw);
+    if (hash === ADMIN_HASH) {
+      localStorage.setItem(ADMIN_SESSION_KEY, "1");
+      document.getElementById("f-adminPass").classList.remove("invalid");
+      showAdminUI();
+      closeAdminLogin();
+      openLeads();
+      // ลบ ?admin จาก URL หลัง login สำเร็จ
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin")) {
+        url.searchParams.delete("admin");
+        history.replaceState(null, "", url.toString());
+      }
+    } else {
+      document.getElementById("f-adminPass").classList.add("invalid");
+      document.getElementById("adminPassword").focus();
+      document.getElementById("adminPassword").select();
+    }
+  } catch (e) {
+    alert("เกิดข้อผิดพลาด: " + e.message);
+  }
+}
+function logoutAdmin() {
+  if (!confirm("ออกจากระบบ admin? (ปุ่ม Leads จะถูกซ่อน)")) return;
+  localStorage.removeItem(ADMIN_SESSION_KEY);
+  hideAdminUI();
+  closeLeads();
+}
+function initAdminGate() {
+  if (isAdmin()) {
+    showAdminUI();
+  } else {
+    hideAdminUI();
+  }
+  const params = new URL(window.location.href).searchParams;
+  if (params.has("admin")) {
+    if (isAdmin()) {
+      openLeads();
+    } else {
+      openAdminLogin();
+    }
+  }
+}
+
+// ============================================================================
 // LEADS ADMIN
 // ============================================================================
 function openLeads() {
+  if (!isAdmin()) { openAdminLogin(); return; }
   renderLeadsTable();
   document.getElementById("leadsBackdrop").classList.add("show");
 }
@@ -1273,6 +1383,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeModal();
     closeLeads();
+    closeAdminLogin();
   }
 });
 
@@ -1282,6 +1393,7 @@ document.addEventListener("keydown", (e) => {
 populateBrandFilter();
 renderGrid();
 updateLeadCount();
+initAdminGate();
 function resetAndRender() { currentPage = 1; renderGrid(); }
 search.addEventListener("input", resetAndRender);
 brandFilter.addEventListener("change", resetAndRender);
